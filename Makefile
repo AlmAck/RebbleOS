@@ -31,13 +31,16 @@ endif
 
 # Do not override this here!  Override this in localconfig.mk.
 ifeq ($(shell uname -s),Darwin)
-PEBBLE_TOOLCHAIN_PATH ?= /usr/local/bin
+TOOLCHAIN_PATH ?= /usr/local/bin
 else
-PEBBLE_TOOLCHAIN_PATH ?= /usr/bin
+TOOLCHAIN_PATH ?= /usr/bin
 endif
 
 # Do not override this here!  Override this in localconfig.mk.
-PFX ?= $(PEBBLE_TOOLCHAIN_PATH)/arm-none-eabi-
+PEBBLE_TOOLCHAIN_PATH ?=
+
+# Do not override this here!  Override this in localconfig.mk.
+PFX ?= $(TOOLCHAIN_PATH)/arm-none-eabi-
 
 CC = $(PFX)gcc
 LD = $(PFX)ld
@@ -172,7 +175,7 @@ $(BUILD)/$(1)/$(1).pbz: $(BUILD)/$(1)/tintin_fw.bin $(BUILD)/$(1)/res/$$(PLATFOR
 # to build the qemu pbpack.
 $(BUILD)/$(1)/res/$$(PLATFORM_ALIAS_$(1))_res.d: res/$$(PLATFORM_ALIAS_$(1)).json $(VIRTUALENV)
 	@mkdir -p $$(dir $$@)
-	$(QUIET)$(VPYTHON3) Utilities/mkpack.py -r res -M $$< $(BUILD)/$(1)/res/$$(PLATFORM_ALIAS_$(1))_res >/dev/null
+	$(QUIET)$(VPYTHON3) Utilities/mkpack.py -r res -s $(PEBBLE_TOOLCHAIN_PATH) -M $$< $(BUILD)/$(1)/res/$$(PLATFORM_ALIAS_$(1))_res >/dev/null
 
 
 $(BUILD)/$(1)/res/platform_res.h: $(BUILD)/$(1)/res/$$(PLATFORM_ALIAS_$(1))_res.h
@@ -184,7 +187,7 @@ $(BUILD)/$(1)/res/$$(PLATFORM_ALIAS_$(1))_res.h: $(BUILD)/$(1)/res/$$(PLATFORM_A
 $(BUILD)/$(1)/res/$$(PLATFORM_ALIAS_$(1))_res.pbpack: res/$$(PLATFORM_ALIAS_$(1)).json $(VIRTUALENV)
 	$(call SAY,[$(1)] MKPACK $$<)
 	@mkdir -p $$(dir $$@)
-	$(QUIET)$(VPYTHON3) Utilities/mkpack.py -r res -M -H -P $$< $(BUILD)/$(1)/res/$$(PLATFORM_ALIAS_$(1))_res
+	$(QUIET)$(VPYTHON3) Utilities/mkpack.py -r res -s $(PEBBLE_TOOLCHAIN_PATH) -M -H -P $$< $(BUILD)/$(1)/res/$$(PLATFORM_ALIAS_$(1))_res
 
 $(BUILD)/$(1)/fw.qemu_spi.bin: Resources/$$(PLATFORM_ALIAS_$(1))_spi.bin $(BUILD)/$(1)/res/$$(PLATFORM_ALIAS_$(1))_res.pbpack
 	$(call SAY,[$(1)] QEMU_SPI)
